@@ -1,5 +1,6 @@
 import pygame
 import random
+import numpy as np
 
 
 class Box:
@@ -7,6 +8,32 @@ class Box:
         self.x = x
         self.y = y
         self.size = size
+
+
+class NN:
+    def __init__(self):
+        self.X = np.array([[random.randint(0, 255), random.randint(0,255), random.randint(0,255)]])
+        self.weights = [np.random.randn(3,3), np.random.randn(3,2)]
+        self.hidden_layer = sigmoid(np.dot(self.X, self.weights[0]))
+        self.output = sigmoid(np.dot(self.hidden_layer, self.weights[1]))
+
+    def train(self, x, target):
+        self.hidden_layer = sigmoid(np.dot(x, self.weights[0]))
+        self.output = sigmoid(np.dot(self.hidden_layer, self.weights[1]))
+        print("for color: {} output : {}".format(x, self.output))
+        output_delta = (target - self.output)*(self.output*(1-self.output))
+        hidden_layer_delta = output_delta.dot(self.weights[1].T)*(self.hidden_layer*(1-self.hidden_layer))
+        self.weights[1] += self.hidden_layer.T.dot(output_delta)
+        self.weights[0] += self.X.T.dot(hidden_layer_delta)
+
+
+def sigmoid(z):
+    """The sigmoid function."""
+    return 1/(1+np.exp(-z))
+
+
+def feed_forward(self):
+        pass
 
 
 pygame.init()
@@ -37,6 +64,9 @@ clock = pygame.time.Clock()
 
 # Setting parameter for when to end game. That is when crashed is True game ends.
 crashed = False
+
+# NeuralNet
+nn = NN()
 
 
 def check():
@@ -71,9 +101,14 @@ while not crashed:
             # choice is the selected box. True if left box, false if right.
             choice = check()
             if choice is not None:
-                print(choice)
+                if choice:
+                    target_output = np.array([[1, 0]])
+                else:
+                    target_output = np.array([[0, 1]])
+                nn.train(np.array([np.asarray(list(rect_color))]), target_output)
                 # Change color every time a box is selected.
                 rect_color = change_color()
+
         # print(event)
 
     # Box-1
