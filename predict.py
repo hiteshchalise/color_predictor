@@ -4,23 +4,25 @@ import numpy as np
 
 
 class Box:
-    def __init__(self, x, y, size):
+    def __init__(self, x, y, sizes):
         self.x = x
         self.y = y
-        self.size = size
+        self.size = sizes
 
 
 class NN:
     def __init__(self):
-        self.X = np.array([[random.randint(0, 255), random.randint(0,255), random.randint(0,255)]])
-        self.weights = [np.random.randn(3,3), np.random.randn(3,2)]
+        self.X = np.array([[random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]])
+        self.weights = [np.random.randn(3, 3), np.random.randn(3, 2)]
         self.hidden_layer = sigmoid(np.dot(self.X, self.weights[0]))
         self.output = sigmoid(np.dot(self.hidden_layer, self.weights[1]))
 
     def train(self, x, target):
+        # FeedForward
         self.hidden_layer = sigmoid(np.dot(x, self.weights[0]))
         self.output = sigmoid(np.dot(self.hidden_layer, self.weights[1]))
-        print("for color: {} output : {}".format(x, self.output))
+
+        # BackPropagation
         output_delta = (target - self.output)*(self.output*(1-self.output))
         hidden_layer_delta = output_delta.dot(self.weights[1].T)*(self.hidden_layer*(1-self.hidden_layer))
         self.weights[1] += self.hidden_layer.T.dot(output_delta)
@@ -30,10 +32,6 @@ class NN:
 def sigmoid(z):
     """The sigmoid function."""
     return 1/(1+np.exp(-z))
-
-
-def feed_forward(self):
-        pass
 
 
 pygame.init()
@@ -109,8 +107,6 @@ while not crashed:
                 # Change color every time a box is selected.
                 rect_color = change_color()
 
-        # print(event)
-
     # Box-1
     pygame.draw.rect(gameDisplay, rect_color, (box1.x, box1.y, box1.size, box1.size))
     pygame.draw.rect(gameDisplay, white, (box1.x, box1.y, box1.size, box1.size), 1)
@@ -118,16 +114,29 @@ while not crashed:
     pygame.draw.rect(gameDisplay, rect_color, (box2.x, box2.y, box2.size, box2.size))
     pygame.draw.rect(gameDisplay, white, (box2.x, box2.y, box2.size, box2.size), 1)
 
+    # Text in box 1
     textSurf, textRect = text_objects("BLACK", smallText, black)
     textRect.center = ((box1.x + (box1.size / 2)), (box1.y + (box1.size / 2)))
     gameDisplay.blit(textSurf, textRect)
 
+    # Text in box 2
     textSurf, textRect = text_objects("WHITE", smallText, white)
     textRect.center = ((box2.x + (box2.size / 2)), (box2.y + (box2.size / 2)))
     gameDisplay.blit(textSurf, textRect)
 
-    pygame.display.update()
+    # Displaying predicted output using circle
+    output = nn.output.flatten()
 
+    if output[0] > output[1]:
+        pygame.draw.circle(gameDisplay, white, (box1.x + box1.size // 2, box1.y + box1.size + 10), 5)
+        pygame.draw.circle(gameDisplay, black, (box2.x + box2.size // 2, box2.y + box2.size + 10), 5)
+
+    else:
+        pygame.draw.circle(gameDisplay, white, (box2.x + box2.size // 2, box2.y + box2.size + 10), 5)
+        pygame.draw.circle(gameDisplay, black, (box1.x + box1.size // 2, box1.y + box1.size + 10), 5)
+
+    # Update pygame display
+    pygame.display.update()
     clock.tick(60)
 
 pygame.quit()
